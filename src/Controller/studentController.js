@@ -9,44 +9,35 @@ const studentData = async (req, res) => {
     try {
 
         let info = req.body;
-        if (Object.keys(info).length == 0) {
-            return res.status(400).send({ status: false, message: "Please Provide Student Infomation " })
+        // let userId = req.params.userId
+
+        if (Object.keys(info).length == 0) return res.status(400).send({ status: false, message: "Please Provide Student Infomation " })
+        
+        let { name, subject, marks, teacherId } = info
+
+        if (!name) return res.status(400).send({ status: false, message: "Name is mandatory" })
+
+        if (!isValidName(name)) return res.status(400).send({ status: false, message: "Name is invalid" });
+        
+        if (!subject) return res.status(400).send({ status: false, message: "subject is mandatory " })
+
+        if (!marks) return res.status(400).send({ status: false, message: "marks is mandatory " })
+
+        // if student is already present then add the marks
+        let studentPresent = await studentModel.findOne({name : name , subject : subject})
+        if(studentPresent) {
+            studentPresent["marks"] += marks;
+            await studentPresent.save();
+            return res.status(200).send({status : true , message : "Updated the marks since student was already present" , data : studentPresent })
         }
-        const { name, subject, marks, teacherId } = info
-        // let id = req.query.teacherId
-        // if (!mongoose.Types.ObjectId.isValid(id)) {
-        //     return res.status(400).send({ status: false, msg: "userId is not valid" })
-        // }
-
-
-        if (!name) {
-            return res.status(400).send({ status: false, message: "Name is mandatory" })
-
-        }
-
-        if (!isValidName(name)) {
-            return res.status(400).send({ status: false, message: "Name is invalid" });
-        }
-
-        if (!subject) {
-            return res.status(400).send({ status: false, message: "subject is mandatory " })
-
-        }
-        if (!marks) {
-            return res.status(400).send({ status: false, message: "marks is mandatory " })
-
-        }
-        if (!teacherId) {
-            return res.status(400).send({ status: false, message: "Teacher Id is mandatory " })
-
-        }
+        
+        if (!teacherId) return res.status(400).send({ status: false, message: "Teacher Id is mandatory " })
 
         let id = req.body.teacherId
         if (!ObjectId.isValid(id)) return res.status(400).send({ status: false, message: "Teacher by this id  is not present" })
 
         const teacher = await userModel.findById(id);
-        if (!teacher)
-            return res.status(400).send({ status: false, msg: "Teacher Not found" });
+        if (!teacher) return res.status(400).send({ status: false, msg: "User Not found" });
 
         let savedData = await studentModel.create(info)
         return res.status(201).send({ status: true, data: savedData })
