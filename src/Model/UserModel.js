@@ -8,15 +8,15 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required : true,
+        required: true,
         unique: true,
-        trim : true
+        trim: true
     },
     password: {
         type: String,
-        required : true,
+        required: true,
         trim: true
     }
-}, {timestamps: true})
+}, { timestamps: true })
 
-module.export = mongoose.model("user",userSchema)
+module.export = mongoose.model("user", userSchema)

@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const saltRound = 10
 
-const userModel = require("../model/UserModel")
+const userModel = require("../Model/UserModel")
 const jwt = require("jsonwebtoken")
 const { isValidName, isValidEmail, isValidPassword } = require("../validation/validation")
 
@@ -27,7 +27,7 @@ const createUser = async (req, res) => {
         if (!isValidEmail(email)) {
             return res.status(404).send({ status: false, message: "email is invalid" })
         }
-        let emailExist = await teacherModel.findOne({ email });
+        let emailExist = await userModel.findOne({ email });
         if (emailExist) {
             return res.status(400).send({ status: false, message: "Teacher with this email already exists" })
         }

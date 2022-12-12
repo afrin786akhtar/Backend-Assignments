@@ -10,12 +10,12 @@ const studentSchema = new mongoose.Schema({
     },
 
     subject: [{
-        type: [String],
+        type: String,
         unique: true,
-        enum: ["maths", "english", "science", "hindi"]
+        enum: ["Maths", "English", "Science", "Hindi", "GK", "Computer"]
 
     }],
-    
+
     marks: {
         type: Number,
         required: true
@@ -23,7 +23,7 @@ const studentSchema = new mongoose.Schema({
     },
     teacherId: {
         type: ObjectId,
-        ref: 'teacher'
+        ref: 'user'
     },
     isDeleted: {
         type: Boolean,

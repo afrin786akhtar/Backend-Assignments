@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const studentModel = require("../Model/studentModel");
 const userModel = require("../Model/UserModel");
-const { isValidName, isValidEmail, isValidate, isValid } = require("../validation/validation")
+const { isValidName, isValidate, isValid } = require("../validation/validation")
 const ObjectId = require('mongoose').Types.ObjectId
 
 //---------------------creating students---------------------
@@ -46,7 +46,7 @@ const studentData = async (req, res) => {
 
         const teacher = await userModel.findById(id);
         if (!teacher)
-            return res.status(400).send({ status: false, msg: "Teacher Not found" });
+            return res.status(400).send({ status: false, msg: "user Not found" });
 
         let savedData = await studentModel.create(info)
         return res.status(201).send({ status: true, data: savedData })
@@ -109,41 +109,30 @@ const getStudentData = async (req, res) => {
 }
 
 //----------------------update/Edit data----------------------
+//----------------------update/Edit data----------------------
 const editStudent = async (req, res) => {
     try {
-        let data = req.body
+        const data = req.body;
         let teacherId = req.params.teacherId
-        let studentId = req.params.studentId
-        let checkDelete = { isDeleted: false }
-
-        let { name, subject, marks } = data
-        let savedData = await studentModel.findOne({ name: name } || { subject: subject })
-
-        let checkStudent = await studentModel.findById(studentId)
-        if(!checkStudent) return res.status(404).send({status : false , message : "No student found with this student Id!!"})
-
-        if(name = checkStudent.name) {
-            checkDelete["name"] = name
+        //   if(!isValid(teacherId)) return res.status(400)
+        let { name, subject, marks } = data;
+        let savedData = await studentModel.findOne({ name: name, subject: subject });
+        if (savedData) {
+            let CreateData = await studentModel.findOneAndUpdate(
+                { name: name },
+                { $set: { marks: savedData.marks + marks } },
+                { new: true }
+            );
+            res.status(200).send({ data: CreateData, message: "marks updated successfully" });
+        } else if (!savedData) {
+            let create1 = await marksModel.create(data);
+            return res.status(201).send({ status: true, data: create1 });
         }
-
-        // if(marks == checkDelete.marks){
-
-        // }
-        // if (savedData) {
-        //     let CreateData = await studentModel.findOneAndUpdate({ name: name, subject: subject },
-        //         { $set: { marks: savedData.marks + marks } },
-        //         { new: true, upsert: true })
-        //     res.status(200).send({ data: CreateData, message: "marks updated successfully" })
-
-        // } else {
-        //     let create1 = await studentModel.create(data)
-        //     return res.status(201).send({ status: true, data: create1 })
-
-        // }
     } catch (err) {
-        return res.status(500).send({ status: false, message: err.message })
+        return res.status(500).send({ status: false, message: err.message });
     }
-}
+};
+
 
 //------------------------delete student----------------------
 const deleatByid = async (req, res) => {
