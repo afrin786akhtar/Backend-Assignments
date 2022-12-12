@@ -19,8 +19,7 @@ const studentSchema = new mongoose.Schema({
     marks: {
         type: Number,
         required: true
-
-    },
+    }, 
     teacherId: {
         type: ObjectId,
         ref: 'user'
