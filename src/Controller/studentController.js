@@ -86,7 +86,7 @@ const getStudentData = async (req, res) => {
         }
 
         //------------returning all the details available
-        const allDetails = await studentModel.find(checkDelete).sort(sortArr)
+        const allDetails = await studentModel.find(checkDelete).select({updatedAt : 0 , __v :0 , createdAt : 0}).sort(sortArr)
 
         if (allDetails.length == 0) return res.status(404).send({ status: false, message: "No data found here!!" })
 
@@ -104,8 +104,9 @@ const getStudentData = async (req, res) => {
 const editStudent = async (req, res) => {
     try {
         const data = req.body;
-        let teacherId = req.params.teacherId
-        //   if(!isValid(teacherId)) return res.status(400)
+        let userId = req.params.userId
+
+          if(!isValid(userId)) return res.status(400).send({status : false , message})
         let { name, subject, marks } = data;
         let savedData = await studentModel.findOne({ name: name, subject: subject });
         if (savedData) {
