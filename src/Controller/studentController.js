@@ -46,7 +46,7 @@ const studentData = async (req, res) => {
 
         const teacher = await userModel.findById(id);
         if (!teacher)
-            return res.status(400).send({ status: false, msg: "user Not found" });
+            return res.status(400).send({ status: false, msg: "Teacher Not found" });
 
         let savedData = await studentModel.create(info)
         return res.status(201).send({ status: true, data: savedData })
@@ -109,7 +109,7 @@ const getStudentData = async (req, res) => {
 }
 
 //----------------------update/Edit data----------------------
-//----------------------update/Edit data----------------------
+
 const editStudent = async (req, res) => {
     try {
         const data = req.body;
@@ -124,7 +124,7 @@ const editStudent = async (req, res) => {
                 { new: true }
             );
             res.status(200).send({ data: CreateData, message: "marks updated successfully" });
-        } else if (!savedData) {   
+        } else if (!savedData) {
             let create1 = await marksModel.create(data);
             return res.status(201).send({ status: true, data: create1 });
         }

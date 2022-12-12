@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const mongoose = require("mongoose")
 const saltRound = 10
 
 const userModel = require("../Model/UserModel")
@@ -10,9 +11,10 @@ const createUser = async (req, res) => {
     try {
         let data = req.body
         if (Object.keys(data).length == 0) {
-            return res.status(400).send({ status: false, message: "Please Provide Teacher Information" })
+            return res.status(400).send({ status: false, message: "Please Provide User Information for registering" })
         }
         const { name, email, password } = data
+
         if (!name) {
             return res.status(400).send({ status: false, message: "Name is mandatory" })
         }
@@ -27,9 +29,10 @@ const createUser = async (req, res) => {
         if (!isValidEmail(email)) {
             return res.status(404).send({ status: false, message: "email is invalid" })
         }
-        let emailExist = await userModel.findOne({ email });
+
+        let emailExist = await userModel.findOne({ email : email });
         if (emailExist) {
-            return res.status(400).send({ status: false, message: "Teacher with this email already exists" })
+            return res.status(400).send({ status: false, message: "User with this email already exists" })
         }
         if (!password) {
             return res.status(400).send({ status: false, message: "Password is mandatory" })
@@ -45,8 +48,8 @@ const createUser = async (req, res) => {
             });
         req.body.password = await encryptedPassword;
 
-        const allData = await userModel.create(data);
-        return res.status(201).send({ status: true, message: "Student is successfully created", data: allData })
+        const student = await userModel.create(data);
+        return res.status(201).send({ status: true, message: "User created successfully", data: student })
 
     }
     catch (err) {
