@@ -12,7 +12,7 @@ const isValidPassword = (password) => {
   if (/^.*(?=.{6,})(?=.*[a-zA-Z])(?=.*\d)(?=.*[!&$%&? "]).*$/.test(password)) return true
   return false
 }
-
+  
 const isValid = (value) => {
   if (typeof value == undefined || value == null || value.length == 0)
     return false;

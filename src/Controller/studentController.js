@@ -124,7 +124,7 @@ const editStudent = async (req, res) => {
                 { new: true }
             );
             res.status(200).send({ data: CreateData, message: "marks updated successfully" });
-        } else if (!savedData) {
+        } else if (!savedData) {   
             let create1 = await marksModel.create(data);
             return res.status(201).send({ status: true, data: create1 });
         }
