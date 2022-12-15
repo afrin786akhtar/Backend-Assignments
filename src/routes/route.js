@@ -1,9 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../Controller/userController')
-const studentController = require('../controller/studentController')
-const Authentication = require('../Middleware/Authentication')
-const Authorization = require('../Middleware/Authorization')
+const {studentData, getStudentData, editStudent, deleatByid} = require('../controller/studentController')
+const authentication = require('../Middleware/Authentication')
 
 //----------------Dummy API-------------
 router.get('/test', function (req, res) {
@@ -14,11 +13,13 @@ router.post("/register", userController.createUser)
 
 router.post("/userLogin", userController.userLogin)
 
-router.post("/studentData", Authentication.Authenticate, studentController.studentData)
+router.post("/studentData/:userId", authentication.Authenticate, studentData)
 
-router.get("/studentData/:userId", Authentication.Authenticate, studentController.getStudentData)
+router.get("/studentData/:userId", authentication.Authenticate, getStudentData)
 
-router.delete("/student/:studentId", Authorization.Authorization, studentController.deleatByid)
+router.put("/student/:userId/:studentId", authentication.Authenticate, editStudent)
+
+router.delete("/deleteData/:userId/:studentId", authentication.Authenticate, deleatByid)
 
 
 module.exports = router

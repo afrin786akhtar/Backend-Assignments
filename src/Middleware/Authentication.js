@@ -9,14 +9,14 @@ const Authenticate = async function (req, res, next) {
 
         if (!token)
             return res.status(400).send({ status: false, message: "Token must be present in the request header" })
-        token = token.replace("Bearer ", "")
-        // console.log(token)
-        jwt.verify(token, "As calm as the sea", (error, decodedToken) => {
+        token = token.split(" ")[1]
+
+        jwt.verify(token, "Students-portal", (error, decodedToken) => {
             if (error) {
                 return res.status(401).send({ status: false, error: error.message })
             }
             else {
-                req.decodedToken = decodedToken
+                req.headers = decodedToken
                 next()
             }
         })

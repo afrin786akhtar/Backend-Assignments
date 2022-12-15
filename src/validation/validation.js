@@ -1,3 +1,9 @@
+const mongoose = require('mongoose')
+
+const isValidObjectId = function(objectId){
+  return mongoose.Types.ObjectId.isValid(objectId)
+}
+
 const isValidName = (name) => {
   if (/^[A-Za-z]{1,35}/.test(name)) return true
   return false
@@ -9,8 +15,7 @@ const isValidEmail = (mail) => {
 }
 
 const isValidPassword = (password) => {
-  if (/^.*(?=.{6,})(?=.*[a-zA-Z])(?=.*\d)(?=.*[!&$%&? "]).*$/.test(password)) return true
-  return false
+  return /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,15}$/.test(password);
 }
   
 const isValid = (value) => {
@@ -26,4 +31,4 @@ const isValidate = function (value) {
   return false;
 };
 
-module.exports = { isValidName, isValidEmail, isValidPassword, isValid, isValidate }
+module.exports = { isValidName, isValidEmail, isValidPassword, isValid, isValidate , isValidObjectId}
