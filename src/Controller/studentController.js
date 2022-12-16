@@ -24,7 +24,7 @@ const studentData = async (req, res) => {
         // if (!isValidObjectId(id))
         //     return res.status(400).send({ status: false, message: "Teacher by this id  is not present" })
 
-        //-----check for authntication----
+        //-----check for authentication----
         if (req.headers.userId != userId) {
             return res.status(400).send({ status: false, message: "User not authorized." })
         }
@@ -42,7 +42,7 @@ const studentData = async (req, res) => {
             return res.status(400).send({ status: false, message: "marks is mandatory " })
 
         // if student is already present then add the marks
-        let studentPresent = await studentModel.findOne({ name: name, subject: subject })
+        let studentPresent = await studentModel.findOne({ name: name, subject: subject }).select({updatedAt: 0, __v: 0, createdAt: 0 })
 
         if (studentPresent) {
             studentPresent["marks"] += marks;
@@ -51,7 +51,7 @@ const studentData = async (req, res) => {
         }
 
         let savedData = await studentModel.create(info)
-        return res.status(201).send({ status: true, data: savedData })
+        return res.status(201).send({ status: true, message: "Student Added successfully!!", data: savedData })
     }
     catch (err) {
         return res.status(500).send({ status: false, message: err.message });
@@ -63,25 +63,16 @@ const studentData = async (req, res) => {
 const getStudentData = async (req, res) => {
     try {
         let query = req.query
-        let userId = req.params.userId
 
         let checkDelete = { isDeleted: false }
         let sortArr = {}
 
-        if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: " UserId is invalid. Please check again." })
-
         const { name, marks, subject, marksLessThan, marksMoreThan, marksSort } = query
-
-        //-----------authorization----------
-        if (req.headers.userId != userId) {
-            return res.status(400).send({ status: false, message: "Person is not authorized for checking students data." })
-        }
-        data["userId"] = userId
 
         //-----------filteration by subjects-------
         if (subject) {
             query.subject = query.subject
-            if (!isValidate(query.subject)) return res.status(400).send({ status: false, message: "Please Enter the subjects from (maths, english, science, hindi" })
+            if (!isValidate(query.subject)) return res.status(400).send({ status: false, message: "Please Enter the subjects from [Maths, English, Science, Hindi, GK, Computer]" });
 
             checkDelete.subject = {}
             checkDelete.subject = { $in: query.subject }
@@ -112,7 +103,7 @@ const getStudentData = async (req, res) => {
 
         if (allDetails.length == 0) return res.status(404).send({ status: false, message: "No data found here!!" })
 
-        return res.status(200).send({ status: true, message: "Success : List of students found ", send: allDetails })
+        return res.status(200).send({ status: true, message: "Success : List of students found ", data: allDetails })
 
 
     } catch (error) {
@@ -125,39 +116,29 @@ const getStudentData = async (req, res) => {
 
 const editStudent = async (req, res) => {
     try {
-        const data = req.body;
+        let data = req.body;
         let userId = req.params.userId;
         let studentId = req.params.studentId;
 
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "Please check the userID" })
         if (!isValidObjectId(studentId)) return res.status(400).send({ status: false, message: "Please check Student Id" })
 
+        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please provide marks for updation." })
+
         //-----authorization-------
         if (req.headers.userId != userId) {
             return res.status(400).send({ status: false, message: "user entered is unauthorized." })
         }
 
-        let { name, subject, marks } = data;
-        let checkDelete = { isDeleted: false };
-
-        let savedData = await studentModel.findById({ studentId });
+        //----checking the student is present in database---
+        let savedData = await studentModel.findById({ _id: studentId, isDeleted: false }).select({updatedAt: 0, __v: 0, createdAt: 0 });
         if (!savedData) return res.status(400).send({ status: false, message: "Student not present." })
 
-        // if(name == savedData.name)
-        // return res.status(400).send({status: false , message : "Name Already present."})
-        // checkDelete["name"] = name
+        let { marks } = data;
 
-        // if(marks == savedData.marks) 
-        // return res.status(400).send({status: false , message : "Name Already present."})
-        // checkDelete["name"] = name
-
-
-        let updateData = await studentModel.findOneAndUpdate(
-            { name: name , subject : subject},
-            { $set: { marks: savedData.marks + marks } },
-            { new: true , upsert: true}
-        );
-        res.status(200).send({ data: updateData, message: "marks updated successfully" });
+        savedData["marks"] += marks;
+        let newData = await savedData.save();
+        return res.status(200).send({ status: true, message: "Updated the marks since student was already present", data: newData })
 
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message });
@@ -171,24 +152,24 @@ const deleatByid = async (req, res) => {
         let userId = req.params.userId;
         let studentId = req.params.studentId;
 
-        if(!isValidObjectId(userId)) 
-        return res.status(400).send({status : false , send: "Please check userID."})
+        if (!isValidObjectId(userId))
+            return res.status(400).send({ status: false, send: "Please check userID." })
 
-        if(!isValidObjectId(studentId))
-        return res.status(400).send({status : false , send: "Please check studentId."})
+        if (!isValidObjectId(studentId))
+            return res.status(400).send({ status: false, send: "Please check studentId." })
 
-        let student = await studentModel.findById({_id : studentId})
+        let student = await studentModel.findById({ _id: studentId }).select({ marks : 0 , subject : 0, updatedAt: 0, __v: 0, createdAt: 0 })
         if (!student) return res.status(404).send({ status: false, message: "Student does not exist" })
 
         //----authorized-----
-        if(req.headers.userId != userId){
-            return res.status(400).send({status : false , message: "Your are not authorized for deleting the user."})
+        if (req.headers.userId != userId) {
+            return res.status(400).send({ status: false, message: "Your are not authorized for deleting the user." })
         }
 
         let is_Deleted = student.isDeleted
-        if (is_Deleted == true) return res.status(404).send({ status: false, message: "Student is already Deleted " })
+        if (is_Deleted == true) return res.status(404).send({ status: false, message: "Student is already Deleted " , data : student })
 
-        let deleteStudent = await studentModel.findOneAndUpdate({ _id: id }, { $set: { isDeleted: true } }, { new: true })
+        let deleteStudent = await studentModel.findOneAndUpdate({ _id: studentId }, { $set: { isDeleted: true } }, { new: true }).select({ marks : 0 , subject : 0, updatedAt: 0, __v: 0, createdAt: 0 })
         return res.status(200).send({ status: true, data: deleteStudent })
 
     } catch (err) {

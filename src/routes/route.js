@@ -15,7 +15,7 @@ router.post("/userLogin", userController.userLogin)
 
 router.post("/studentData/:userId", authentication.Authenticate, studentData)
 
-router.get("/studentData/:userId", authentication.Authenticate, getStudentData)
+router.get("/studentData", authentication.Authenticate, getStudentData)
 
 router.put("/student/:userId/:studentId", authentication.Authenticate, editStudent)
 
